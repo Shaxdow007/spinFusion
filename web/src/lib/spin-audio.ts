@@ -1,13 +1,11 @@
 let audioCtx: AudioContext | null = null;
 
-
 function getCtx(): AudioContext {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
   }
   return audioCtx;
 }
-
 
 export function tickSound(enabled: boolean) {
   if (!enabled) return;
@@ -29,7 +27,6 @@ export function tickSound(enabled: boolean) {
   }
 }
 
-
 export function spinStartSound(enabled: boolean) {
   if (!enabled) return;
   try {
@@ -50,7 +47,6 @@ export function spinStartSound(enabled: boolean) {
   }
 }
 
-
 export function celebrationSound(enabled: boolean) {
   if (!enabled) return;
   try {
@@ -66,3 +62,10 @@ export function celebrationSound(enabled: boolean) {
       gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
       osc.connect(gain);
       gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.4);
+    });
+  } catch {
+    // ignore
+  }
+}

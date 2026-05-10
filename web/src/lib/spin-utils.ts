@@ -1,12 +1,10 @@
 import type { SpinEntry } from './spin-types';
 
-
 export function secureRandom(): number {
   const arr = new Uint32Array(1);
   crypto.getRandomValues(arr);
   return arr[0] / (0xFFFFFFFF + 1);
 }
-
 
 export function pickWeightedWinner(entries: SpinEntry[]): SpinEntry {
   const total = entries.reduce((s, e) => s + e.weight, 0);
@@ -17,7 +15,6 @@ export function pickWeightedWinner(entries: SpinEntry[]): SpinEntry {
   }
   return entries[entries.length - 1];
 }
-
 
 export function computeFinalAngle(
   entries: SpinEntry[],
@@ -42,12 +39,10 @@ export function computeFinalAngle(
   return currentAngle + Math.PI * 12;
 }
 
-
 export function truncate(text: string, maxLen: number): string {
   if (text.length <= maxLen) return text;
   return text.slice(0, maxLen - 1) + '…';
 }
-
 
 export function computeFontSize(entryCount: number): number {
   if (entryCount <= 4) return 22;
@@ -57,7 +52,6 @@ export function computeFontSize(entryCount: number): number {
   return 8;
 }
 
-
 export function assignColors(texts: string[], colors: string[]): SpinEntry[] {
   return texts.map((text, i) => ({
     id: Date.now() + i,
@@ -66,4 +60,3 @@ export function assignColors(texts: string[], colors: string[]): SpinEntry[] {
     color: colors[i % colors.length],
   }));
 }
-
