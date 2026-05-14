@@ -81,6 +81,7 @@ export default function Index() {
     current: number;
     total: number;
   } | null>(null);
+  const [multiWinners, setMultiWinners] = useState<SpinEntry[]>([]);
   const multiQueueRef = useRef<SpinEntry[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -250,11 +251,10 @@ export default function Index() {
         if (pool.length === 0) break;
         const w = pickWeightedWinner(pool);
         winners.push(w);
-        if (!state.settings.allowDuplicates) {
-          pool = pool.filter((e) => e.id !== w.id);
-        }
+        pool = pool.filter((e) => e.id !== w.id);
       }
       multiQueueRef.current = winners;
+      setMultiWinners(winners);
       setMultiProgress({ current: 0, total: winners.length });
       if (state.settings.countdownEnabled) {
         dispatch({ type: "SET_COUNTING", payload: true });
@@ -262,6 +262,7 @@ export default function Index() {
         startNextMultiSpin();
       }
     } else {
+      setMultiWinners([]);
       if (state.settings.countdownEnabled) {
         dispatch({ type: "SET_COUNTING", payload: true });
       } else {
@@ -292,7 +293,8 @@ export default function Index() {
     }
     celebrationSound(state.settings.soundEnabled);
 
-    if (state.settings.removeAfterPick) {
+    const isMultiRun = (multiProgress?.total ?? 0) > 1;
+    if (isMultiRun || state.settings.removeAfterPick) {
       setTimeout(() => {
         dispatch({ type: "DELETE_ENTRY", payload: winner.id });
       }, 400);
@@ -521,10 +523,11 @@ export default function Index() {
             {t("pickCount")}:&nbsp;
           </span>
           <select
-            className="text-xs rounded-lg px-2 py-1 outline-none cursor-pointer"
+            className="text-xs rounded-xl px-3 py-1.5 outline-none cursor-pointer"
             style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background:
+                "linear-gradient(145deg,rgba(99,179,237,0.18),rgba(79,209,197,0.12))",
+              border: "1px solid rgba(99,179,237,0.45)",
               color: "var(--text-bright)",
             }}
             value={state.settings.pickCount}
@@ -924,7 +927,7 @@ export default function Index() {
                         onChange={(e) => setBulkText(e.target.value)}
                         placeholder="Paste names here, separated by commas or new lines..."
                         className="w-full outline-none resize-none transition-colors focus:border-[rgba(99,179,237,0.4)]"
-                        rows={4}
+                        rows={10}
                         style={{
                           background: "rgba(255,255,255,0.05)",
                           border: "1px solid rgba(255,255,255,0.1)",
@@ -932,6 +935,7 @@ export default function Index() {
                           color: "var(--text-bright)",
                           fontSize: "13px",
                           padding: "10px 14px",
+                          minHeight: "220px",
                         }}
                       />
                       <div className="flex items-center justify-between">
@@ -1455,8 +1459,32 @@ export default function Index() {
                   lineHeight: 1.1,
                 }}
               >
-                {state.winner.text}
+                {multiWinners.length > 1
+                  ? `${multiWinners.length} Winners`
+                  : state.winner.text}
               </motion.h1>
+              {multiWinners.length > 1 && (
+                <div
+                  className="mb-4 max-h-52 overflow-auto rounded-xl p-3 text-left"
+                  style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                  }}
+                >
+                  {multiWinners.map((winner, idx) => (
+                    <div
+                      key={`${winner.id}-${idx}`}
+                      className="text-sm py-1.5 px-2 rounded-md"
+                      style={{
+                        color: "var(--text-bright)",
+                        borderLeft: `3px solid ${winner.color}`,
+                      }}
+                    >
+                      {idx + 1}. {winner.text}
+                    </div>
+                  ))}
+                </div>
+              )}
               <p
                 className="text-[13px] mb-8"
                 style={{ color: "var(--text-hint)" }}
@@ -1784,10 +1812,7 @@ export default function Index() {
                         >
                           {t("pickCount")}
                         </span>
-                        <input
-                          type="number"
-                          min={1}
-                          max={10}
+                        <select
                           value={state.settings.pickCount}
                           onChange={(e) =>
                             dispatch({
@@ -1795,14 +1820,21 @@ export default function Index() {
                               payload: { pickCount: Number(e.target.value) },
                             })
                           }
-                          className="w-16 text-center rounded-lg outline-none"
+                          className="w-20 text-center rounded-xl outline-none cursor-pointer"
                           style={{
-                            background: "rgba(255,255,255,0.05)",
-                            border: "1px solid rgba(255,255,255,0.1)",
+                            background:
+                              "linear-gradient(145deg,rgba(99,179,237,0.18),rgba(79,209,197,0.12))",
+                            border: "1px solid rgba(99,179,237,0.45)",
                             color: "var(--text-bright)",
-                            padding: "4px",
+                            padding: "6px 8px",
                           }}
-                        />
+                        >
+                          {Array.from({ length: 10 }, (_, i) => (
+                            <option key={i} value={i + 1}>
+                              {i + 1}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   )}
