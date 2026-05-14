@@ -26,7 +26,6 @@ export interface SpinSettings {
   soundEnabled: boolean;
   winnerDisplay: 'popup' | 'toast' | 'none';
   colorTheme: number;
-  lightMode: boolean;
 }
 
 export interface SpinState {

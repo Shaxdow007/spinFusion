@@ -41,7 +41,6 @@ export const initialState: SpinState = {
     soundEnabled: true,
     winnerDisplay: 'popup',
     colorTheme: 0,
-    lightMode: false,
   },
 };
 
