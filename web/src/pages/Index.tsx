@@ -251,9 +251,7 @@ export default function Index() {
         if (pool.length === 0) break;
         const w = pickWeightedWinner(pool);
         winners.push(w);
-        if (!state.settings.allowDuplicates) {
-          pool = pool.filter((e) => e.id !== w.id);
-        }
+        pool = pool.filter((e) => e.id !== w.id);
       }
       multiQueueRef.current = winners;
       setMultiWinners(winners);
