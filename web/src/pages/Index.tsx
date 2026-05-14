@@ -204,6 +204,13 @@ export default function Index() {
   ]);
 
   useEffect(() => {
+    document.documentElement.classList.toggle(
+      "light",
+      state.settings.lightMode,
+    );
+  }, [state.settings.lightMode]);
+
+  useEffect(() => {
     if (!state.counting) return;
     let count = 3;
     dispatch({ type: "SET_COUNT_NUM", payload: count });
@@ -1702,6 +1709,16 @@ export default function Index() {
                           }
                         />
                       </div>
+                      <ToggleRow
+                        label="Light mode"
+                        value={state.settings.lightMode}
+                        onChange={(v) =>
+                          dispatch({
+                            type: "UPDATE_SETTINGS",
+                            payload: { lightMode: v },
+                          })
+                        }
+                      />
                     </div>
                   )}
                   {customizeTab === "spinSettings" && (
