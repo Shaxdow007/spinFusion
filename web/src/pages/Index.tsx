@@ -204,6 +204,13 @@ export default function Index() {
   ]);
 
   useEffect(() => {
+    document.documentElement.classList.toggle(
+      "light",
+      state.settings.themeMode === "light",
+    );
+  }, [state.settings.themeMode]);
+
+  useEffect(() => {
     if (!state.counting) return;
     let count = 3;
     dispatch({ type: "SET_COUNT_NUM", payload: count });
@@ -269,6 +276,16 @@ export default function Index() {
         doSingleSpin();
       }
     }
+  }
+
+  function handlePickCountChange(value: number) {
+    dispatch({
+      type: "UPDATE_SETTINGS",
+      payload: {
+        pickCount: value,
+        ...(value > 1 ? { removeAfterPick: true } : {}),
+      },
+    });
   }
 
   function doSingleSpin() {
@@ -531,12 +548,7 @@ export default function Index() {
               color: "var(--text-bright)",
             }}
             value={state.settings.pickCount}
-            onChange={(e) =>
-              dispatch({
-                type: "UPDATE_SETTINGS",
-                payload: { pickCount: Number(e.target.value) },
-              })
-            }
+            onChange={(e) => handlePickCountChange(Number(e.target.value))}
           >
             {Array.from({ length: 10 }, (_, i) => (
               <option key={i} value={i + 1}>
@@ -1697,6 +1709,33 @@ export default function Index() {
                           }
                         />
                       </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+                          Theme
+                        </span>
+                        <select
+                          value={state.settings.themeMode}
+                          onChange={(e) =>
+                            dispatch({
+                              type: "UPDATE_SETTINGS",
+                              payload: {
+                                themeMode: e.target.value as "dark" | "light",
+                              },
+                            })
+                          }
+                          className="w-24 text-center rounded-xl outline-none cursor-pointer"
+                          style={{
+                            background:
+                              "linear-gradient(145deg,rgba(99,179,237,0.18),rgba(79,209,197,0.12))",
+                            border: "1px solid rgba(99,179,237,0.45)",
+                            color: "var(--text-bright)",
+                            padding: "6px 8px",
+                          }}
+                        >
+                          <option value="dark">Dark</option>
+                          <option value="light">Light</option>
+                        </select>
+                      </div>
                     </div>
                   )}
                   {customizeTab === "spinSettings" && (
@@ -1815,10 +1854,7 @@ export default function Index() {
                         <select
                           value={state.settings.pickCount}
                           onChange={(e) =>
-                            dispatch({
-                              type: "UPDATE_SETTINGS",
-                              payload: { pickCount: Number(e.target.value) },
-                            })
+                            handlePickCountChange(Number(e.target.value))
                           }
                           className="w-20 text-center rounded-xl outline-none cursor-pointer"
                           style={{
