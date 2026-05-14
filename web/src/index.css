@@ -44,6 +44,20 @@
     --radius: 0.75rem;
   }
 
+  :root.light {
+    --bg-deep: #eef3ff;
+    --bg-surface: #ffffff;
+    --bg-glass: rgba(255, 255, 255, 0.7);
+    --border-glow: rgba(20, 39, 77, 0.12);
+    --border-neon: rgba(59, 130, 246, 0.35);
+    --text-bright: #0d1b3a;
+    --text-muted: #3d4b6a;
+    --text-hint: #6d7893;
+    --glow-sm: 0 0 12px rgba(59, 130, 246, 0.2);
+    --glow-md: 0 0 30px rgba(59, 130, 246, 0.28);
+    --glow-lg: 0 0 60px rgba(59, 130, 246, 0.15);
+  }
+
   body {
     background: var(--bg-deep);
     color: var(--text-bright);

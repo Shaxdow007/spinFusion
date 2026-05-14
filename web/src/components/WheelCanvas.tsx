@@ -18,6 +18,14 @@ export default function WheelCanvas({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const angleRef = useRef(currentAngle);
+  const prevEntriesRef = useRef<SpinEntry[]>(entries);
+  const removedGhostRef = useRef<{
+    start: number;
+    end: number;
+    color: string;
+    text: string;
+    alpha: number;
+  } | null>(null);
   angleRef.current = currentAngle;
 
   const drawWheel = useCallback(
@@ -94,6 +102,22 @@ export default function WheelCanvas({
 
         startAngle += sliceAngle;
       });
+
+      const ghost = removedGhostRef.current;
+      if (ghost && ghost.alpha > 0) {
+        ctx.save();
+        ctx.globalAlpha = ghost.alpha;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, ghost.start, ghost.end);
+        ctx.closePath();
+        ctx.fillStyle = ghost.color;
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.9)";
+        ctx.lineWidth = 2 * dpr;
+        ctx.stroke();
+        ctx.restore();
+      }
 
       // outer glow ring
       ctx.beginPath();
@@ -174,6 +198,46 @@ export default function WheelCanvas({
     const size = Math.min(canvas.clientWidth, canvas.clientHeight);
     drawWheel(ctx, size);
   }, [currentAngle, drawWheel]);
+
+  useEffect(() => {
+    const prevEntries = prevEntriesRef.current;
+    prevEntriesRef.current = entries;
+    if (prevEntries.length !== entries.length + 1) return;
+    const removed = prevEntries.find(
+      (p: SpinEntry) => !entries.some((e) => e.id === p.id),
+    );
+    if (!removed) return;
+    const totalWeight = prevEntries.reduce((s: number, e: SpinEntry) => s + e.weight, 0);
+    let start = angleRef.current;
+    for (const entry of prevEntries as SpinEntry[]) {
+      const slice = (entry.weight / totalWeight) * Math.PI * 2;
+      if (entry.id === removed.id) {
+        removedGhostRef.current = {
+          start,
+          end: start + slice,
+          color: removed.color,
+          text: removed.text,
+          alpha: 0.9,
+        };
+        break;
+      }
+      start += slice;
+    }
+    const startAt = performance.now();
+    const duration = 450;
+    const tick = (now: number) => {
+      const ghost = removedGhostRef.current;
+      if (!ghost) return;
+      const t = Math.min((now - startAt) / duration, 1);
+      ghost.alpha = 0.9 * (1 - t);
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (canvas && ctx) drawWheel(ctx, Math.min(canvas.clientWidth, canvas.clientHeight));
+      if (t < 1) requestAnimationFrame(tick);
+      else removedGhostRef.current = null;
+    };
+    requestAnimationFrame(tick);
+  }, [entries, drawWheel]);
 
   return (
     <div

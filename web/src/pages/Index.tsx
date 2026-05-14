@@ -204,6 +204,13 @@ export default function Index() {
   ]);
 
   useEffect(() => {
+    document.documentElement.classList.toggle(
+      "light",
+      state.settings.lightMode,
+    );
+  }, [state.settings.lightMode]);
+
+  useEffect(() => {
     if (!state.counting) return;
     let count = 3;
     dispatch({ type: "SET_COUNT_NUM", payload: count });
@@ -269,6 +276,16 @@ export default function Index() {
         doSingleSpin();
       }
     }
+  }
+
+  function handlePickCountChange(value: number) {
+    dispatch({
+      type: "UPDATE_SETTINGS",
+      payload: {
+        pickCount: value,
+        ...(value > 1 ? { removeAfterPick: true } : {}),
+      },
+    });
   }
 
   function doSingleSpin() {
@@ -531,12 +548,7 @@ export default function Index() {
               color: "var(--text-bright)",
             }}
             value={state.settings.pickCount}
-            onChange={(e) =>
-              dispatch({
-                type: "UPDATE_SETTINGS",
-                payload: { pickCount: Number(e.target.value) },
-              })
-            }
+            onChange={(e) => handlePickCountChange(Number(e.target.value))}
           >
             {Array.from({ length: 10 }, (_, i) => (
               <option key={i} value={i + 1}>
@@ -1697,6 +1709,16 @@ export default function Index() {
                           }
                         />
                       </div>
+                      <ToggleRow
+                        label="Light mode"
+                        value={state.settings.lightMode}
+                        onChange={(v) =>
+                          dispatch({
+                            type: "UPDATE_SETTINGS",
+                            payload: { lightMode: v },
+                          })
+                        }
+                      />
                     </div>
                   )}
                   {customizeTab === "spinSettings" && (
@@ -1815,10 +1837,7 @@ export default function Index() {
                         <select
                           value={state.settings.pickCount}
                           onChange={(e) =>
-                            dispatch({
-                              type: "UPDATE_SETTINGS",
-                              payload: { pickCount: Number(e.target.value) },
-                            })
+                            handlePickCountChange(Number(e.target.value))
                           }
                           className="w-20 text-center rounded-xl outline-none cursor-pointer"
                           style={{
