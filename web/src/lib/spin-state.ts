@@ -41,6 +41,7 @@ export const initialState: SpinState = {
     soundEnabled: true,
     winnerDisplay: 'popup',
     colorTheme: 0,
+    themeMode: 'dark',
   },
 };
 
@@ -54,7 +55,13 @@ export function loadPersistedState(): Partial<SpinState> {
         results: parsed.results || [],
         spinCount: parsed.spinCount || 0,
         nextId: parsed.nextId || 8,
-        settings: { ...initialState.settings, ...parsed.settings },
+        settings: {
+          ...initialState.settings,
+          ...parsed.settings,
+          themeMode:
+            parsed.settings?.themeMode ||
+            (parsed.settings?.lightMode ? 'light' : 'dark'),
+        },
         lang: parsed.lang || 'en',
       };
     }
